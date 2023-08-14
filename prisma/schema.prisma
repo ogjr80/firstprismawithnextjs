@@ -1,0 +1,122 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id Int @id @default(autoincrement())
+  name String
+  email String  @unique
+  role Role? @default(USER)
+  profile Profile?
+  posts Post[] 
+
+}
+model Profile {
+  id Int @id @default(autoincrement())
+  bio String
+  userId Int @unique
+  user User @relation( fields: [userId], references: [id])
+}
+enum Role {
+  ADMIN
+  USER
+}
+model Post { 
+  id Int @id @default(autoincrement())
+  authorId Int
+  author User @relation(fields: [authorId], references: [id])
+  title String 
+  createAt DateTime @default(now())
+  updateAt DateTime @updatedAt
+  published Boolean @default(false)
+  categories  Category[]
+}
+
+model Category { 
+  id Int @id @default(autoincrement())
+  name String 
+  posts  Post[]
+}
+
+
+
+
+//this is another way of defining composite primary keys in prisma 
+// model User { 
+//   firstname String 
+//   lastname String 
+//  profile Profile?  
+
+//  @@unique([firstname, lastname])
+
+//some possible definitions inside the model definitions
+// @@map("users")
+// @@id(email, name)
+//@@unique(name, role)
+//@@index(id, email)
+
+// }
+
+// model Profile {
+//   id Int @id @default (autoincrement())
+//   userLastName String 
+//   userFirstName String 
+//   user User @relation(fields: [userFirstName, userLastName], references: [firstname,lastname])
+
+//   @@unique([userFirstName, userLastName])
+// }
+
+//example of explicit definition of a many to many relationships 
+//big advantage is that you are able to define additional fields in the pivot/join table. 
+//please note the inplicit is soo much easier and is implemented above. 
+// model Product{
+//   id Int @id @default(autoincrement())
+//   orderdetails orderDetails[] 
+// }
+
+//this is another example of data modeling with Prisma for 
+//Product Category, Product Sub Category and Products
+
+// model ProductCategory {
+//   id Int @id @default(autoincrement())
+//   name String 
+//   productsubcategories ProductSubCategory[]
+
+// }
+
+// model ProductSubCategory {
+//   id Int @id @default(autoincrement())
+//   name String 
+//   productCategoryId Int 
+//   productcategory ProductCategory @relation(fields: [productCategoryId], references: [id])
+//   products Product[]
+// }
+
+// model Product {
+//   id Int @id @default(autoincrement())
+//   name String 
+//   price Float 
+//   quantity Float 
+//   productCategoryId Int @unique
+//   productsubcategories ProductSubCategory @relation(fields: [productCategoryId], references: [id])
+// }
+
+
+// model Order{
+//   id Int @id @default(autoincrement())
+//   order orderDetails[]
+// }
+
+
+// model orderDetails {
+//   int Int @id @default(autoincrement())
+//   productId Int 
+//   product Product @relation(fields: [productId], references: [id])
+//   orderId Int 
+//   order Order @relation(fields: [orderId], references: [id])
+// }
